@@ -14,41 +14,49 @@ matio.ffi = mat
 --]]
 function matio.load(filename, name)
    local file = mat.open(filename, mat.ACC_RDONLY);
-   if not file then
-      error('File could not be opened: ' .. filename)      
+   if file == nil then
+      print('File could not be opened: ' .. filename)      
       return
    end
    local var = mat.varRead(file, name);
-   if not var then
-      error('Could not find var in fil: ' .. name)
+   if var == nil then
+      print('Could not find variable with name: ' .. name .. ' in file: ' .. name)
       mat.close(file);
       return
    end
    local out
+   local sizeof
    -- type check
    if var.class_type == mat.C_CHAR or var.class_type == mat.C_INT8 then
       out = torch.CharTensor()
+      sizeof = 1
    elseif var.class_type == mat.C_UINT8 then
       out = torch.ByteTensor()
+      sizeof = 1
    elseif var.class_type == mat.C_INT16 or var.class_type == mat.C_UINT16 then
 	 out = torch.ShortTensor()
+	 sizeof = 2
    elseif var.class_type == mat.C_INT32 or var.class_type == mat.C_UINT32 then
 	 out = torch.IntTensor()
+	 sizeof = 4
    elseif var.class_type == mat.C_INT64 or var.class_type == mat.C_UINT64 then
 	 out = torch.LongTensor()
+	 sizeof = 8
    elseif var.class_type == mat.C_SINGLE then
 	 out = torch.FloatTensor()
+	 sizeof = 4
    elseif var.class_type == mat.C_DOUBLE then
 	 out = torch.DoubleTensor()
+	 sizeof = 8
    else
-      error('Unsupported type of variable, only matrices are supported, cells, structs, objects and functions are not supported for loading')
+      print('Unsupported type of variable, only matrices are supported, cells, structs, objects and functions are not supported for loading')
       mat.close(file);
       return
    end
 
    -- rank check
    if var.rank > 8 or var.rank < 1 then
-      error('Rank of input matrix is invalid: ' .. var.rank)
+      print('Rank of input matrix is invalid: ' .. var.rank)
       mat.close(file);
       return
    end
@@ -67,8 +75,7 @@ function matio.load(filename, name)
    out:resize(torch.LongStorage(revsizes))
 
    -- memcpy
-   ffi.copy(out:data(), var.data, out:nElement() * ffi.sizeof(out:data()));
-   
+   ffi.copy(out:data(), var.data, out:nElement() * sizeof);
    mat.close(file);
    -- -- transpose, because matlab is column-major
    if out:dim() > 1 then
