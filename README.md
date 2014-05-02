@@ -23,11 +23,15 @@ luarocks install https://raw.githubusercontent.com/soumith/matio-ffi.torch/maste
 ```
 
 # Usage #
-
+###Load a tensor from matlab array
 ```lua
 local matio = require 'matio'
 testTensor = matio.load('test.mat', 'var_a')
 ```
 
+### Calling MATIO C functions
+
 All MATIO C functions are available in the `matio.ffi.` namespace returned by require. The only difference is the naming, which is not prefixed
 by `Mat_` anymore. 
+
+For example, look at matio.load in init.lua
