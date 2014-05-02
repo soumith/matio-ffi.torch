@@ -62,14 +62,14 @@ function matio.load(filename, name)
    for i=1, var.rank do
       revsizes[i] = sizes[var.rank-i+1]
    end
-   print(sizes)
 
    -- resize tensor
    out:resize(torch.LongStorage(revsizes))
 
    -- memcpy
    ffi.copy(out:data(), var.data, out:nElement() * ffi.sizeof(out:data()));
-
+   
+   mat.close(file);
    -- -- transpose, because matlab is column-major
    if out:dim() > 1 then
       for i=1,out:dim() do	 
