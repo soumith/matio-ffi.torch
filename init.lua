@@ -79,8 +79,8 @@ function matio.load(filename, name)
    mat.close(file);
    -- -- transpose, because matlab is column-major
    if out:dim() > 1 then
-      for i=1,out:dim() do	 
-   	 out=out:transpose(1, out:dim()-i+1)
+      for i=1,math.floor(out:dim()/2) do	 
+   	 out=out:transpose(i, out:dim()-i+1)
       end
    end
    return out
