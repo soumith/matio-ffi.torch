@@ -1,4 +1,0 @@
-mat = require 'matio'
-
-a=mat.load('test.mat', 'a')
-print(a)
