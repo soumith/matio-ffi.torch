@@ -1,0 +1,57 @@
+local ffi=require 'ffi'
+local defines = {}
+function defines.register_hashdefs(mat, C)
+   mat.ACC_RDONLY = 0
+   mat.ACC_RDWR = 1
+   mat.FT_MAT73 = 0x0200
+   mat.FT_MAT5 = 0x0100
+   mat.FT_MAT4 = 0x0010
+   mat.T_UNKNOWN = 0
+   mat.T_INT8 = 1
+   mat.T_UINT8 = 2
+   mat.T_INT16 = 3
+   mat.T_UINT16 = 4
+   mat.T_INT32 = 5
+   mat.T_UINT32 = 6
+   mat.T_SINGLE = 7
+   mat.T_DOUBLE = 9
+   mat.T_INT64 = 12
+   mat.T_UINT64 = 13
+   mat.T_MATRIX = 14
+   mat.T_COMPRESSED = 15
+   mat.T_UTF8 = 16
+   mat.T_UTF16 = 17
+   mat.T_UTF32 = 18
+   mat.T_STRING = 20
+   mat.T_CELL = 21
+   mat.T_STRUCT = 22
+   mat.T_ARRAY = 23
+   mat.T_FUNCTION = 24
+   mat.C_EMPTY = 0
+   mat.C_CELL = 1
+   mat.C_STRUCT = 2
+   mat.C_OBJECT = 3
+   mat.C_CHAR = 4
+   mat.C_SPARSE = 5
+   mat.C_DOUBLE = 6
+   mat.C_SINGLE = 7
+   mat.C_INT8 = 8
+   mat.C_UINT8 = 9
+   mat.C_INT16 = 10
+   mat.C_UINT16 = 11
+   mat.C_INT32 = 12
+   mat.C_UINT32 = 13
+   mat.C_INT64 = 14
+   mat.C_UINT64 = 15
+   mat.C_FUNCTION = 16
+   mat.F_COMPLEX = 0x0800
+   mat.F_GLOBAL = 0x0400
+   mat.F_LOGICAL = 0x0200
+   mat.F_DONT_COPY_DATA = 0x0001
+   mat.COMPRESSION_NONE = 0
+   mat.COMPRESSION_ZLIB = 1
+   mat.BY_NAME = 1
+   mat.BY_INDEX = 2
+end
+
+return defines
