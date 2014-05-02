@@ -20,7 +20,7 @@ function matio.load(filename, name)
    end
    local var = mat.varRead(file, name);
    if var == nil then
-      print('Could not find variable with name: ' .. name .. ' in file: ' .. name)
+      print('Could not find variable with name: ' .. name .. ' in file: ' .. filename)
       mat.close(file);
       return
    end
