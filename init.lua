@@ -76,6 +76,7 @@ function matio.load(filename, name)
 
    -- memcpy
    ffi.copy(out:data(), var.data, out:nElement() * sizeof);
+   mat.varFree(var);
    mat.close(file);
    -- -- transpose, because matlab is column-major
    if out:dim() > 1 then
