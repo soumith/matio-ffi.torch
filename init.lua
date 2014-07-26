@@ -78,6 +78,8 @@ end
 --[[
    Load a given variable from a given .mat file as a torch tensor of the appropriate type
    matio.load(filename, variableName)
+   matio.load(filename)
+   matio.load(filename,{'var1','var2'})
 
    Example:
    local img1 = matio.load('data.mat', 'img1')

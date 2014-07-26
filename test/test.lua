@@ -16,7 +16,6 @@ OK = a:dist(a1['a']) == 0
 print(OK and 'OK' or 'Error on valriable number of arguments to read')
 
 a2 = mat.load('test.mat',{'a'})
-
 OK = a:dist(a2['a']) == 0
 print(OK and 'OK' or 'Error on given number of arguments to read')
 
