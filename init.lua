@@ -90,11 +90,15 @@ function matio.load(filename, name)
    end
 
    local names
+   local string_name
    -- if name is not given then load everything
    if not name then
       names = {}
    elseif type(name) == 'string' then
       names = {name}
+      string_name = true
+   elseif type(name) == 'table' then
+      names = name
    end
 
    if #names == 0 then
@@ -121,7 +125,7 @@ function matio.load(filename, name)
    end
 
    -- conserve backward compatibility
-   if #names == 1 then
+   if #names == 1 and string_name then
       return out[names[1]]
    else
       return out
