@@ -8,7 +8,7 @@ matio.ffi = mat
 local function mat_read_variable(file, name)
    local var = mat.varRead(file, name);
    if var == nil then
-      print('Could not find variable with name: ' .. name .. ' in file: ' .. filename)
+      print('Could not find variable with name: ' .. name .. ' in file: ' .. ffi.string(mat.getFilename(file)))
       mat.close(file);
       return
    end

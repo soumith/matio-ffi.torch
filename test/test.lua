@@ -19,3 +19,7 @@ a2 = mat.load('test.mat',{'a'})
 
 OK = a:dist(a2['a']) == 0
 print(OK and 'OK' or 'Error on given number of arguments to read')
+
+a3 = mat.load('test.mat','b')
+OK = a3 == nil
+print(OK and 'OK' or 'Error on wrong argument name')
