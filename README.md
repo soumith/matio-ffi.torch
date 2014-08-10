@@ -26,7 +26,10 @@ luarocks install matio
 ###Load a tensor from matlab array
 ```lua
 local matio = require 'matio'
-testTensor = matio.load('test.mat', 'var_a')
+-- load a single array from file
+tensor = matio.load('test.mat', 'var_a')
+-- load multiple arrays from file
+tensors = matio.load('test.mat',{'var1','var2'})
 ```
 
 ### Calling MATIO C functions
