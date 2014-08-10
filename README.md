@@ -19,7 +19,7 @@ sudo apt-get install libmatio2
 
 
 ```sh
-luarocks install https://raw.githubusercontent.com/soumith/matio-ffi.torch/master/matio-scm-1.rockspec
+luarocks install matio
 ```
 
 # Usage #
