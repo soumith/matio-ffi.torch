@@ -30,6 +30,8 @@ local matio = require 'matio'
 tensor = matio.load('test.mat', 'var_a')
 -- load multiple arrays from file
 tensors = matio.load('test.mat',{'var1','var2'})
+-- load all arrays from file
+tensors = matio.load('test.mat')
 ```
 
 ### Calling MATIO C functions
