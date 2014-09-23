@@ -7,7 +7,11 @@ matio.ffi = mat
 
 
 local tensor_types_mapper = {
-   [mat.C_CHAR]   = {constructor='CharTensor',  sizeof=1},
+-- [mat.C_CHAR]   = {constructor='CharTensor',  sizeof=1},  
+-- will load C_CHAR * as a lua string, instead of torch tensor
+-- this is not back-compatible with the previous version of this package
+-- but it seems to the more common use case in mat files, as
+-- typically there will be cells or strutcs containing strings.
    [mat.C_INT8]   = {constructor='CharTensor',  sizeof=1},
    [mat.C_UINT8]  = {constructor='ByteTensor',  sizeof=1},
    [mat.C_INT16]  = {constructor='ShortTensor', sizeof=2},
@@ -67,7 +71,39 @@ local function load_tensor(file, var)
    return out
 end
 
-local function mat_read_variable(file, var)
+local function load_struct(file, var)
+   local out = {}
+   n_fields = mat.varGetNumberOfFields(var)
+   field_names =  mat.varGetStructFieldnames(var)
+   for i=0,n_fields-1 do
+      field_name = ffi.string(field_names[i])
+      print(field_name)
+      field_value = mat.varGetStructFieldByIndex(var, i, 0)
+      out[field_name] = mat_read_variable(file, field_value)
+   end  
+   return out
+end
+
+local function load_cell(file, var)
+   local out = {};
+   local index = 0
+   while true do
+      cell = mat.varGetCell(var, index) 
+      if cell == nil then
+         break
+      end 
+      index = index + 1
+      out[index] = mat_read_variable(file, cell)
+   end
+   return out
+end
+
+
+local function load_string(file, var)
+   return ffi.string(var.data)
+end
+
+function mat_read_variable(file, var)
    print(var.class_type)   
 
    if tensor_types_mapper[tonumber(var.class_type)] then
@@ -75,28 +111,23 @@ local function mat_read_variable(file, var)
       return load_tensor(file, var)
    end
 
-   if var.class_type == mat.C_CELL then
-      print('loading cell')
-      -- todo: finish support for cells (currently incorrect)
-      local cell = mat.varGetCell(var, 0)
-      return mat_read_variable(file, cell)
+   if var.class_type == mat.C_CHAR then
+      print('loading string')
+      return load_string(file, var)
    end
 
-   local out = {}
+   if var.class_type == mat.C_CELL then
+      print('loading cell')
+      return load_cell(file, var)
+   end
  
    if var.class_type == mat.C_STRUCT then
        print('loading struct')
-       n_fields = mat.varGetNumberOfFields(var)
-       field_names =  mat.varGetStructFieldnames(var)
-       for i=0,n_fields-1 do
-         field_name = ffi.string(field_names[i])
-         print(field_name)
-         field_value = mat.varGetStructFieldByIndex(var, i, 0)
-         out[field_name] = mat_read_variable(file, field_value)
-      end   
+       return load_struct(file, var)
    end 
    
-   return out
+   print('Unsupported variable type: ' .. var.class_type)
+   return nil
 
 end
 
