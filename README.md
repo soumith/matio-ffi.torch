@@ -34,6 +34,17 @@ tensors = matio.load('test.mat',{'var1','var2'})
 tensors = matio.load('test.mat')
 ```
 
+###Load structs, cell arrays and strings
+
+There is some basic support for more complex data structures defined by the MAT file format.
+Structs will be converted to lua tables, indexed by their field names. Cell arrays are converted tua lua arrays (tables indexed by numerals). Variables containing char pointers will be converted to lua strings.
+
+```lua
+local matio = require 'matio'
+-- load a struct, which contains tensors, cell arrays and strings
+my_complex_data = matio.load('test.mat')
+```
+
 ### Calling MATIO C functions
 
 All MATIO C functions are available in the `matio.ffi.` namespace returned by require. The only difference is the naming, which is not prefixed
