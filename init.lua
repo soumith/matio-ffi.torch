@@ -8,9 +8,9 @@ matio.ffi = mat
 
 local tensor_types_mapper = {
 -- [mat.C_CHAR]   = {constructor='CharTensor',  sizeof=1},  
--- will load C_CHAR * as a lua string, instead of torch tensor
+-- will load C_CHAR as a lua string, instead of torch tensor
 -- this is not back-compatible with the previous version of this package
--- but it seems to the more common use case in mat files, as
+-- but it seems to be the common use case in mat files, as
 -- typically there will be cells or strutcs containing strings.
    [mat.C_INT8]   = {constructor='CharTensor',  sizeof=1},
    [mat.C_UINT8]  = {constructor='ByteTensor',  sizeof=1},
@@ -34,7 +34,6 @@ local function load_tensor(file, var)
       sizeof = mapper.sizeof   
    else
       print('Unsupported type of tensor: ' .. var.class_type)
-      print('Only matrices are supported')
       return nil
    end
 
@@ -62,7 +61,7 @@ local function load_tensor(file, var)
    ffi.copy(out:data(), var.data, out:nElement() * sizeof);
    mat.varFree(var);
    
-   -- -- transpose, because matlab is column-major
+   -- transpose, because matlab is column-major
    if out:dim() > 1 then
       for i=1,math.floor(out:dim()/2) do
          out=out:transpose(i, out:dim()-i+1)
@@ -77,7 +76,6 @@ local function load_struct(file, var)
    field_names =  mat.varGetStructFieldnames(var)
    for i=0,n_fields-1 do
       field_name = ffi.string(field_names[i])
-      print(field_name)
       field_value = mat.varGetStructFieldByIndex(var, i, 0)
       out[field_name] = mat_read_variable(file, field_value)
    end  
@@ -93,6 +91,7 @@ local function load_cell(file, var)
          break
       end 
       index = index + 1
+      -- using array index starting at 1 (lua standard)
       out[index] = mat_read_variable(file, cell)
    end
    return out
@@ -103,26 +102,22 @@ local function load_string(file, var)
    return ffi.string(var.data)
 end
 
-function mat_read_variable(file, var)
-   print(var.class_type)   
+function mat_read_variable(file, var) 
 
    if tensor_types_mapper[tonumber(var.class_type)] then
-      print('loading tensor')
       return load_tensor(file, var)
    end
 
+   -- will load C_CHAR as a lua string, instead of torch tensor
    if var.class_type == mat.C_CHAR then
-      print('loading string')
       return load_string(file, var)
    end
 
    if var.class_type == mat.C_CELL then
-      print('loading cell')
       return load_cell(file, var)
    end
  
    if var.class_type == mat.C_STRUCT then
-       print('loading struct')
        return load_struct(file, var)
    end 
    
@@ -165,7 +160,6 @@ function matio.load(filename, name)
       while var ~= nil do
          var_name_str = ffi.string(var.name)
          table.insert(names, var_name_str)
-         print(var_name_str)
          var = mat.varReadNextInfo(file)
       end
    end
