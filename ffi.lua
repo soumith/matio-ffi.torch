@@ -2,7 +2,19 @@
 -- Generated with dev/create-ffi.lua
 
 local ffi = require 'ffi'
-local C = ffi.load('matio')
+local C
+local ok = pcall(function()  C = ffi.load('matio') end)
+if not ok then
+   if ffi.os == 'Linux' then
+      ok = pcall(function()  C = ffi.load('libmatio.so.2') end)
+   end
+   if not ok then
+      error('Could not find libmatio. ' .. 
+               'Please make sure that you installd MatIO and you ' .. 
+               'have the shared libraries (libmatio.so or libmatio.dylib) '
+               .. 'in your library path')
+   end
+end
 local mat = {C=C}
 
 require 'matio.cdefs'
