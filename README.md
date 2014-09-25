@@ -19,14 +19,19 @@ sudo apt-get install libmatio2
 
 
 ```sh
-luarocks install https://raw.githubusercontent.com/soumith/matio-ffi.torch/master/matio-scm-1.rockspec
+luarocks install matio
 ```
 
 # Usage #
 ###Load a tensor from matlab array
 ```lua
 local matio = require 'matio'
-testTensor = matio.load('test.mat', 'var_a')
+-- load a single array from file
+tensor = matio.load('test.mat', 'var_a')
+-- load multiple arrays from file
+tensors = matio.load('test.mat',{'var1','var2'})
+-- load all arrays from file
+tensors = matio.load('test.mat')
 ```
 
 ### Calling MATIO C functions
