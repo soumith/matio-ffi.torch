@@ -128,7 +128,7 @@ end
 --[[
    Load all variables (or just the requested ones) from a given .mat file 
    It supports structs, cell arrays and tensors of the appropriate types.
-   Sequences or characters can be optionally be loaded as lua strings instead
+   Sequences of characters can optionally be loaded as lua strings instead
    of torch CharTensors.
 
    matio.load(filename, variableName)
