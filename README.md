@@ -34,26 +34,6 @@ tensors = matio.load('test.mat',{'var1','var2'})
 tensors = matio.load('test.mat')
 ```
 
-###Load structs, cell arrays and strings
-
-There is some basic support for more complex data structures defined by the MAT file format.
-Structs will be converted to lua tables, indexed by their field names. Cell arrays are converted tua lua arrays (tables indexed by numerals).
-
-```lua
-local matio = require 'matio'
--- load a struct, which contains tensors, cell arrays and strings
-my_complex_data = matio.load('test.mat')
-```
-
-If you want to read sequences of characters as lua strings instead of Torch CharTensor, enable the following flag:
-
-```lua
-matio.use_lua_strings = true
--- load data
-data_with_strings = matio.load('test.mat')
-```
-
-
 ### Calling MATIO C functions
 
 All MATIO C functions are available in the `matio.ffi.` namespace returned by require. The only difference is the naming, which is not prefixed
