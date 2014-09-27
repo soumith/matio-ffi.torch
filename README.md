@@ -45,6 +45,15 @@ local matio = require 'matio'
 my_complex_data = matio.load('test.mat')
 ```
 
+If you want to read sequences of characters as lua strings instead of Torch CharTensor, enable the following flag:
+
+```lua
+matio.use_lua_strings = true
+-- load data
+data_with_strings = matio.load('test.mat')
+```
+
+
 ### Calling MATIO C functions
 
 All MATIO C functions are available in the `matio.ffi.` namespace returned by require. The only difference is the naming, which is not prefixed
