@@ -5,13 +5,12 @@ local mat = require 'matio.ffi'
 local matio = {}
 matio.ffi = mat
 
+-- optional setting: loads lua strings instead of CharTensor
+matio.use_lua_strings = false
 
+-- mapping of MAT matrix types into torch tensor
 local tensor_types_mapper = {
--- [mat.C_CHAR]   = {constructor='CharTensor',  sizeof=1},  
--- will load C_CHAR as a lua string, instead of torch tensor
--- this is not back-compatible with the previous version of this package
--- but it seems to be the common use case in mat files, as
--- typically there will be cells or strutcs containing strings.
+   [mat.C_CHAR]   = {constructor='CharTensor',  sizeof=1},  
    [mat.C_INT8]   = {constructor='CharTensor',  sizeof=1},
    [mat.C_UINT8]  = {constructor='ByteTensor',  sizeof=1},
    [mat.C_INT16]  = {constructor='ShortTensor', sizeof=2},
@@ -28,7 +27,7 @@ local function load_tensor(file, var)
    local out
    local sizeof
    -- type check
-   mapper = tensor_types_mapper[tonumber(var.class_type)]
+   local mapper = tensor_types_mapper[tonumber(var.class_type)]
    if mapper then
       out = torch[mapper.constructor]()
       sizeof = mapper.sizeof   
@@ -104,13 +103,13 @@ end
 
 function mat_read_variable(file, var) 
 
-   if tensor_types_mapper[tonumber(var.class_type)] then
-      return load_tensor(file, var)
+   -- will load C_CHAR sequence as a lua string, instead of torch tensor
+   if matio.use_lua_strings == true and var.class_type == mat.C_CHAR then
+      return load_string(file, var)
    end
 
-   -- will load C_CHAR as a lua string, instead of torch tensor
-   if var.class_type == mat.C_CHAR then
-      return load_string(file, var)
+   if tensor_types_mapper[tonumber(var.class_type)] then
+      return load_tensor(file, var)
    end
 
    if var.class_type == mat.C_CELL then
@@ -127,7 +126,11 @@ function mat_read_variable(file, var)
 end
 
 --[[
-   Load a given variable from a given .mat file as a torch tensor of the appropriate type
+   Load all variables (or just the requested ones) from a given .mat file 
+   It supports structs, cell arrays and tensors of the appropriate types.
+   Sequences or characters can be optionally be loaded as lua strings instead
+   of torch CharTensors.
+
    matio.load(filename, variableName)
    matio.load(filename)
    matio.load(filename,{'var1','var2'})
@@ -136,6 +139,7 @@ end
    local img1 = matio.load('data.mat', 'img1')
 --]]
 function matio.load(filename, name)
+
    local file = mat.open(filename, mat.ACC_RDONLY);
    if file == nil then
       print('File could not be opened: ' .. filename)
@@ -172,11 +176,16 @@ function matio.load(filename, name)
    local out = {}
    for i, varname in ipairs(names) do
       local var = mat.varRead(file, varname);
-      local x = mat_read_variable(file, var)
-      if x == nil then
+
+      if var ~= nil then
+         local x = mat_read_variable(file, var)
+         if x ~= nil then
+            out[varname] = x
+         end
+      else   
          print('Could not find variable with name: ' .. name .. ' in file: ' .. ffi.string(mat.getFilename(file)))
       end
-      out[varname] = x
+
    end
 
    mat.close(file)
