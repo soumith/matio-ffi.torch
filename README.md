@@ -37,7 +37,7 @@ tensors = matio.load('test.mat')
 ###Load structs, cell arrays and strings
 
 There is some basic support for more complex data structures defined by the MAT file format.
-Structs will be converted to lua tables, indexed by their field names. Cell arrays are converted tua lua arrays (tables indexed by numerals).
+Structs will be converted to lua tables, indexed by their field names. Cell arrays are converted to lua arrays (tables indexed by numerals).
 
 ```lua
 local matio = require 'matio'
