@@ -8,7 +8,7 @@ A LuaJIT interface to MATIO
 First, make sure MATIO is installed on your system. This package only requires the binary shared libraries (.so, .dylib, .dll).
 Please see your package management system to install MATIO. 
 You can also download and compile matio from [MATIO web page](http://matio.sourceforge.net)
-If you are manually compiling matio from scratch (instead of using your package manager), please disable hdf5 support, [it seems to have a bug)(https://github.com/soumith/matio-ffi.torch/issues/7). 
+If you are manually compiling matio from scratch (instead of using your package manager), please disable hdf5 support, [it seems to have a bug](https://github.com/soumith/matio-ffi.torch/issues/7). 
 
 ```sh
 # OSX
