@@ -71,11 +71,11 @@ end
 
 local function load_struct(file, var)
    local out = {}
-   n_fields = mat.varGetNumberOfFields(var)
-   field_names =  mat.varGetStructFieldnames(var)
+   local n_fields = mat.varGetNumberOfFields(var)
+   local field_names =  mat.varGetStructFieldnames(var)
    for i=0,n_fields-1 do
-      field_name = ffi.string(field_names[i])
-      field_value = mat.varGetStructFieldByIndex(var, i, 0)
+      local field_name = ffi.string(field_names[i])
+      local field_value = mat.varGetStructFieldByIndex(var, i, 0)
       out[field_name] = mat_read_variable(file, field_value)
    end  
    return out
@@ -85,7 +85,7 @@ local function load_cell(file, var)
    local out = {};
    local index = 0
    while true do
-      cell = mat.varGetCell(var, index) 
+      local cell = mat.varGetCell(var, index) 
       if cell == nil then
          break
       end 
@@ -117,8 +117,26 @@ function mat_read_variable(file, var)
    end
  
    if var.class_type == mat.C_STRUCT then
-       return load_struct(file, var)
-   end 
+      local nelems = 1
+      for i=0,var.rank-1 do nelems = nelems*tonumber(var.dims[i]) end
+
+      if nelems>1 and var.rank==2 then
+         local array = {}
+         for i=0,tonumber(var.dims[0])-1 do
+            array[i+1] = {}
+            for j=0,tonumber(var.dims[1])-1 do
+               local fieldvar = mat.varGetStructsLinear(var,i+j*tonumber(var.dims[0]),1,1,0)
+               array[i+1][j+1] = load_struct(file, fieldvar)
+               mat.varFree(fieldvar);
+            end
+         end
+         return array
+      elseif var.rank>2 then
+         print('Multidimensional structs currently not implemented.')
+      else
+          return load_struct(file, var)
+      end
+   end
    
    print('Unsupported variable type: ' .. var.class_type)
    return nil
@@ -162,7 +180,7 @@ function matio.load(filename, name)
       -- go over the file and get the names
       local var = mat.varReadNextInfo(file)
       while var ~= nil do
-         var_name_str = ffi.string(var.name)
+         local var_name_str = ffi.string(var.name)
          table.insert(names, var_name_str)
          var = mat.varReadNextInfo(file)
       end
