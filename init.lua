@@ -98,7 +98,7 @@ end
 
 
 local function load_string(file, var)
-   return ffi.string(var.data)
+   return var.data~=nil and ffi.string(var.data) or ''
 end
 
 function mat_read_variable(file, var) 
@@ -106,6 +106,10 @@ function mat_read_variable(file, var)
    -- will load C_CHAR sequence as a lua string, instead of torch tensor
    if matio.use_lua_strings == true and var.class_type == mat.C_CHAR then
       return load_string(file, var)
+   end
+
+   if var.data == nil then
+      return nil
    end
 
    if tensor_types_mapper[tonumber(var.class_type)] then
@@ -138,7 +142,7 @@ function mat_read_variable(file, var)
       end
    end
    
-   print('Unsupported variable type: ' .. var.class_type)
+   print('Unsupported variable type: ' .. tonumber(var.class_type))
    return nil
 
 end
