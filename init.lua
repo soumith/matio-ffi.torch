@@ -253,7 +253,7 @@ function matio.load(filename, name)
             out[varname] = x
          end
       else   
-         print('Could not find variable with name: ' .. name .. ' in file: ' .. ffi.string(mat.getFilename(file)))
+         print('Could not find variable with name: ' .. varname .. ' in file: ' .. ffi.string(mat.getFilename(file)))
       end
 
    end
