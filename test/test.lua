@@ -48,4 +48,27 @@ OK = vars.s['matrix'][3][1] == 13
 print(OK and 'OK' or 'Error at reading tensor value')
 
 
+------------------------------------------------------
+--save
+------------------------------------------------------
+-- save one variable
+a = torch.rand(2,3,4)
+filename = paths.tmpname()
+mat.save(filename,a)
+aa = mat.load(filename,'x')
+assert(torch.isTensor(aa))
+assert(a:eq(aa):all())
+assert(aa:size(1)==2 and aa:size(2)==3 and aa:size(3)==4)
 
+-- save a set of variables of different types and dimensions
+a = torch.rand(2,3,4)
+b = torch.rand(3,4):float()
+filename = paths.tmpname()
+mat.save(filename,{x1=a,x2=b})
+aa = mat.load(filename)
+assert(torch.isTensor(aa.x1) and torch.isTensor(aa.x2))
+assert(a:eq(aa.x1):all() and b:eq(aa.x2):all())
+assert(aa.x1:size(1)==2 and aa.x1:size(2)==3 and aa.x1:size(3)==4)
+assert(aa.x2:size(1)==3 and aa.x2:size(2)==4)
+
+print('Saving is OK!')

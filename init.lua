@@ -8,6 +8,9 @@ matio.ffi = mat
 -- optional setting: loads lua strings instead of CharTensor
 matio.use_lua_strings = false
 
+-- compression mode for saving
+matio.compression = mat.COMPRESSION_ZLIB
+
 -- mapping of MAT matrix types into torch tensor
 local tensor_types_mapper = {
    [mat.C_CHAR]   = {constructor='CharTensor',  sizeof=1},  
@@ -265,10 +268,28 @@ function matio.load(filename, name)
    end
 end
 
+--[[
+   Save Torch tensors to a .mat file.
+   It supports all Torch tensor types (except cuda tensors).
+   If you provide a table, it saves all tensors in the table
+   as separate variables, whose name in the .mat file is the
+   key of the table.
+   By default, save the tensors in MAT5 format using ZLIB
+   compression. The compression can be changed by setting 
+   matio.compression variable to matio.ffi.COMPRESSION_NONE
+   or matio.ffi.COMPRESSION_ZLIB
+
+   matio.save(filename, tensor)
+   matio.save(filename, {name1=tensor1, name2=tensor2})
+
+   Example:
+   local data = torch.rand(5,5)
+   matio.save('data.mat', data)
+--]]
 function matio.save(filename, data)
    local file = mat.createVer(filename, nil, mat.FT_MAT5)
 
-   local compression = mat.COMPRESSION_ZLIB
+   local compression = matio.compression
    if type(data) == 'table' then
       for k,v in pairs(data) do
          if torch.isTensor(v) then
