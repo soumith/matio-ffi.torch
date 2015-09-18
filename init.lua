@@ -8,6 +8,9 @@ matio.ffi = mat
 -- optional setting: loads lua strings instead of CharTensor
 matio.use_lua_strings = false
 
+-- compression mode for saving
+matio.compression = mat.COMPRESSION_ZLIB
+
 -- mapping of MAT matrix types into torch tensor
 local tensor_types_mapper = {
    [mat.C_CHAR]   = {constructor='CharTensor',  sizeof=1},  
@@ -22,6 +25,51 @@ local tensor_types_mapper = {
    [mat.C_SINGLE] = {constructor='FloatTensor', sizeof=4},
    [mat.C_DOUBLE] = {constructor='DoubleTensor',sizeof=8}
 }
+
+-- mapping of torch tensor into MAT matrix types
+local tensor_types_invmapper = {
+   ['torch.CharTensor']   = {c_type=mat.C_CHAR,   t_type=mat.T_CHAR},
+   ['torch.ByteTensor']   = {c_type=mat.C_UINT8,  t_type=mat.T_UINT8},
+   ['torch.ShortTensor']  = {c_type=mat.C_INT16,  t_type=mat.T_INT16},
+   ['torch.IntTensor']    = {c_type=mat.C_INT32,  t_type=mat.T_INT32},
+   ['torch.LongTensor']   = {c_type=mat.C_INT64,  t_type=mat.T_INT64},
+   ['torch.FloatTensor']  = {c_type=mat.C_SINGLE, t_type=mat.T_SINGLE},
+   ['torch.DoubleTensor'] = {c_type=mat.C_DOUBLE, t_type=mat.T_DOUBLE}
+}
+
+local function save_tensor(file, tensor, name, compression)
+
+   -- get type of tensor
+   local mapper = tensor_types_invmapper[tensor:type()]
+   local c_type, t_type
+   if mapper then
+      c_type = mapper.c_type
+      t_type = mapper.t_type
+   else
+      print('Unsupported type of tensor: ' .. tensor:type())
+      return
+   end
+
+   -- every vector is at least 2d in matlab
+   if tensor:dim() == 1 then
+      tensor = tensor:view(-1,1)
+   end
+   local dims = tensor:dim()
+   local sizes = tensor:size()
+
+   -- transpose, because matlab is column-major
+   if dims > 1 then
+      for i=1,math.floor(dims/2) do
+         tensor=tensor:transpose(i, dims-i+1)
+      end
+      tensor = tensor:contiguous()
+   end
+
+   local var = mat.varCreate(name, c_type, t_type, dims,
+                             sizes:data(), tensor:data(), 0)
+   mat.varWrite(file, var, compression)
+   mat.varFree(var)
+end
 
 local function load_tensor(file, var)
    local out
@@ -205,7 +253,7 @@ function matio.load(filename, name)
             out[varname] = x
          end
       else   
-         print('Could not find variable with name: ' .. name .. ' in file: ' .. ffi.string(mat.getFilename(file)))
+         print('Could not find variable with name: ' .. varname .. ' in file: ' .. ffi.string(mat.getFilename(file)))
       end
 
    end
@@ -218,6 +266,49 @@ function matio.load(filename, name)
    else
       return out
    end
+end
+
+--[[
+   Save Torch tensors to a .mat file.
+   It supports all Torch tensor types (except cuda tensors).
+   If you provide a table, it saves all tensors in the table
+   as separate variables, whose name in the .mat file is the
+   key of the table.
+   By default, save the tensors in MAT5 format using ZLIB
+   compression. The compression can be changed by setting 
+   matio.compression variable to matio.ffi.COMPRESSION_NONE
+   or matio.ffi.COMPRESSION_ZLIB
+
+   matio.save(filename, tensor)
+   matio.save(filename, {name1=tensor1, name2=tensor2})
+
+   Example:
+   local data = torch.rand(5,5)
+   matio.save('data.mat', data)
+--]]
+function matio.save(filename, data)
+   local file = mat.createVer(filename, nil, mat.FT_MAT5)
+
+   local compression = matio.compression
+   if type(data) == 'table' then
+      for k,v in pairs(data) do
+         if torch.isTensor(v) then
+            save_tensor(file, v, k, compression)
+         else
+            -- closing file and asserting error
+            mat.close(file)
+            error('only tensor or table of tensors supported!')
+         end
+      end
+   elseif torch.isTensor(a) then
+      save_tensor(file, data, 'x', compression)
+   else
+      -- closing file and asserting error
+      mat.close(file)
+      error('only tensor or table of tensors supported!')
+   end
+
+   mat.close(file)
 end
 
 return matio
