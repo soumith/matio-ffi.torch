@@ -300,7 +300,7 @@ function matio.save(filename, data)
             error('only tensor or table of tensors supported!')
          end
       end
-   elseif torch.isTensor(a) then
+   elseif torch.isTensor(data) then
       save_tensor(file, data, 'x', compression)
    else
       -- closing file and asserting error
