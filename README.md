@@ -64,6 +64,11 @@ matio.save('test1.mat',data)
 data1 = torch.rand(5,5)
 data2 = torch.rand(2,3):float()
 matio.save('test2.mat',{t1=data1,t2=data2})
+--save a mix of tensors, booleans, strings, and chars
+data1 = torch.rand(2,3):float()
+matio.save('test3.mat',{t1=data1,t2='hello',t3=9,t4=false})
+--save a table of string keys as a struct 
+matio.save('test4.mat',{ myStruct = {t1=9,t2=false} })
 ```
 By default, the matlab files are saved in MAT5 format, using ZLIB compression. To save without compression, change the following variable:
 ```lua
