@@ -1,14 +1,26 @@
 -- Do not change this file manually
 -- Generated with dev/create-ffi.lua
 
+-- Tracekback (error printout)
+local function traceback(message)
+    local tp = type(message)
+    if tp ~= "string" and tp ~= "number" then return message end
+    local debug = _G.debug
+    if type(debug) ~= "table" then return message end
+    local tb = debug.traceback
+    if type(tb) ~= "function" then return message end
+    return tb(message)
+end
+
 local ffi = require 'ffi'
 local C
-local ok = pcall(function()  C = ffi.load('matio') end)
+local ok, err = xpcall(function()  C = ffi.load('matio') end, traceback)
 if not ok then
    if ffi.os == 'Linux' then
-      ok = pcall(function()  C = ffi.load('libmatio.so.2') end)
+      ok, err = xpcall(function()  C = ffi.load('libmatio.so.2') end, traceback)
    end
    if not ok then
+      print(err)
       error('Could not find libmatio. ' .. 
                'Please make sure that you installd MatIO and you ' .. 
                'have the shared libraries (libmatio.so or libmatio.dylib) '
