@@ -223,7 +223,7 @@ local function load_cell(file, var)
 end
 
 local function load_string(file, var)
-  return var.data~=nil and ffi.string(var.data) or ''
+  return var.data~=nil and ffi.string(var.data,var.nbytes) or ''
 end
 
 function mat_read_variable(file, var) 
