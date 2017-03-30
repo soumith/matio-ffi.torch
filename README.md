@@ -12,7 +12,7 @@ If you are manually compiling matio from scratch (instead of using your package 
 
 ```sh
 # OSX
-brew install libmatio
+brew install homebrew/science/libmatio
 
 # Ubuntu
 sudo apt-get install libmatio2
