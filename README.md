@@ -14,8 +14,13 @@ If you are manually compiling matio from scratch (instead of using your package 
 # OSX
 brew install homebrew/science/libmatio
 
-# Ubuntu
+# Ubuntu <= 16.04
 sudo apt-get install libmatio2
+
+# Ubuntu 18.04
+sudo apt-get install libmatio4
+ln -s /usr/lib/x86_64-linux-gnu/libmatio.so.4 /usr/lib/x86_64-linux-gnu/libmatio.so
+
 ```
 
 
